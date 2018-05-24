@@ -12,8 +12,6 @@ if (isset($_POST["login"], $_POST["pass"])) {
     // donc mysqli_escape_string
     $login = mysqli_escape_string($link, $login);
     $pass = mysqli_escape_string($link, $pass);
-    echo(json_encode($login));
-    echo(json_encode($pass));
     $salt = PASSWORD_SALT;
 
     // on selectionne ALL depuis l'utilisateur ou se trouve le login
@@ -45,7 +43,6 @@ if (isset($_POST["login"], $_POST["pass"])) {
             // Sinon on redirigera vers l'index avec un message
             //            $page = "utilisateur.php";
 
-            echo $_SESSION["userType"];
             if ($_SESSION["userType"] == "comptable") {
                 header("Location: page_accueil/comptable.php");
             } else if ($_SESSION["userType"] == "admin") {
