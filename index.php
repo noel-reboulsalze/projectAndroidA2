@@ -1,10 +1,12 @@
 <?php include_once './includes/fonctions.php'; ?>
 <?php include_once './includes/config.php'; ?>
 <?php
+
 // On teste si l'utilisateur a validé le formulaire
-if (isset($_POST["login"], $_POST["pass"])) {
-    $login = $_POST["login"];
-    $pass = $_POST["pass"];
+if (isset(json_decode(file_get_contents('php://input'),true)['login']) 
+    && isset(json_decode(file_get_contents('php://input'),true)['pass'])) {
+    $login = json_decode(file_get_contents('php://input'),true)["login"];
+    $pass = json_decode(file_get_contents('php://input'),true)["pass"];
     $message = "";
     $link = mysqli_connect_utf8(MYSQL_SERVER, MYSQL_USER, MYSQL_PASS, MYSQL_BASE);
     // Problème de sécurité : Injection SQL
@@ -20,9 +22,9 @@ if (isset($_POST["login"], $_POST["pass"])) {
 
     $membre = mysqli_fetch_assoc($result);
     mysqli_close($link);
-
     if ($membre === null) {
-        $message = "Mauvais login/pass";
+        $message = "Mauvais login/pass";  
+        http_response_code(404);
     } else {
         // On enregistre dans la session le login de l'utilisateur qui s'est connecté
         // TODO
@@ -30,6 +32,8 @@ if (isset($_POST["login"], $_POST["pass"])) {
         $_SESSION["userConnected"] = $membre["login"];
         $_SESSION["userID"] = $membre["utilisateur_id"];
         $_SESSION["userType"] = $membre["type"];
+
+        echo json_encode($membre);
 
         // Si on vient d'une page sécurisée
         // on redirige vers la page d'origine
@@ -44,13 +48,13 @@ if (isset($_POST["login"], $_POST["pass"])) {
             //            $page = "utilisateur.php";
 
             if ($_SESSION["userType"] == "comptable") {
-                header("Location: page_accueil/comptable.php");
+                //header("Location: page_accueil/comptable.php");
             } else if ($_SESSION["userType"] == "admin") {
-                header("Location: page_accueil/admin.php");
+                //header("Location: page_accueil/admin.php");
             } else if ($_SESSION["userType"] == "salarie") {
-                header("Location: page_accueil/utilisateur.php");
+                //header("Location: page_accueil/utilisateur.php");
             } else if ($_SESSION["userType"] == "commercial") {
-                header("Location: page_accueil/commercial.php");
+                //header("Location: page_accueil/commercial.php");
             }
             //            $page = "admin.php";
             // todo
@@ -59,29 +63,6 @@ if (isset($_POST["login"], $_POST["pass"])) {
 
         exit();
     }
+} else {
+    http_response_code(500);
 } ?>
-
-<LINK rel="stylesheet" type="text/css" href="connexion.css">
-
-<form method="post">
-    <div id="formulaire">
-    <form>
-      <table>
-        <?php if(isset($message)){?>
-        <tr>
-            <td colspan=2 ><font color="red"><?php echo $message ?></font></td>
-        </tr>
-        <?php } ?>
-        <tr>
-          <td>Login :</td>
-          <td> <input type="text" name="login"> </td>
-        </tr>
-        <tr>
-          <td>Password :</td>
-          <td> <input type="password" name="pass" autocomplete="off"> </td>
-        </tr>
-      </table>
-      <input type="submit" value="OK" id="OK">
-    </form>
-    </div>
-</form>
